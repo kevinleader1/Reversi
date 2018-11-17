@@ -1,6 +1,6 @@
 <template>
     <div class="box">
-        <pawn></pawn>
+        <pawn :boxId="boxId"></pawn>
     </div>
 </template>
 
@@ -9,6 +9,7 @@
 
     export default {
         name: 'box',
+        props: ['boxId'],
         components: {
             pawn
         }
@@ -24,10 +25,9 @@
         border: 1px solid #2ba072;
         margin: 0;
         box-sizing: border-box;
-        cursor:pointer;
 
-        .active {
-            cursor:default;
+        &:hover .pawn:not(.active) {
+             opacity: 0.6;
         }
     }
 </style>

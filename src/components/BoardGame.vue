@@ -1,6 +1,6 @@
 <template>
     <div id="bordGame">
-        <box v-for="n in 64"></box>
+        <box v-for="n in 64" :boxId="n"></box>
     </div>
 </template>
 
@@ -9,10 +9,35 @@
 
     export default {
         name: 'BoardGame',
-        props: ['numberBox'],
         components: {
             box
         },
+        // We need to init configuration in bordGame once time to not repeat data
+        data: function(){
+
+            let isBlack = 0, isWhite = 1;
+
+            return {
+                pawnItem: {
+                    activeByDefault: [28, 29, 36, 37],
+                    isBlack : 0,
+                    isWhite : 1,
+
+                    28: {
+                        color: isBlack
+                    },
+                    29: {
+                        color: isWhite
+                    },
+                    36: {
+                        color: isBlack
+                    },
+                    37: {
+                        color: isWhite
+                    }
+                }
+            }
+        }
     }
 </script>
 
