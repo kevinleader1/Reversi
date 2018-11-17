@@ -10,9 +10,9 @@
 
 <style lang="less" scoped>
     .box {
-        flex: 1;
-        border: 2px solid white;
-        background-color: red;
+        width: 12.5%;
+        border: 1px solid #2ba072;
         margin: 0;
+        box-sizing: border-box;
     }
 </style>
