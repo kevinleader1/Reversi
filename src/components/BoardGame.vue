@@ -5,7 +5,6 @@
 </template>
 
 <script>
-
     import box from './box.vue'
 
     export default {
@@ -26,6 +25,7 @@
         box-sizing: border-box;
         background-color: #32bb85;
         width: 100%;
+        max-width: 800px;
         height: 100%;
         position: fixed;
         top: 0;
