@@ -185,19 +185,28 @@
                             canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayX.boxSwitch);
                         }
 
-                        console.log(canWePlayBox)
-
                         /*
                          ---- Start with Y verification ---
                          ----                           ---
                          */
 
-                        // Only if we don't have near same color on X
                         let canWePLayY = this.canWePlayBoxY(boxId, idColorPlayer, boxItems);
 
                         if (canWePLayY.weCanPlay) {
                             canWePlayBox.weCanPlay = true;
                             canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayY.boxSwitch);
+                        }
+
+                        /*
+                         ---- Start with Z verification ( diagonal )---
+                         ----                           ---
+                         */
+
+                        let canWePLayZ = this.canWePlayBoxZ(boxId, idColorPlayer, boxItems);
+
+                        if (canWePLayZ.weCanPlay) {
+                            canWePlayBox.weCanPlay = true;
+                            canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayZ.boxSwitch);
                         }
                     }
 
@@ -332,7 +341,7 @@
                                     canWePlayBoxY.boxSwitch.push(nextItem);
                                 } else {
                                     // If there is one empty box, cut. We cannot make bridge in this game !
-                                    canWePlayBoxY.boxSwitch = []  ;
+                                    canWePlayBoxY.boxSwitch = [];
                                     canWePlayBoxY.weCanPlay = false;
                                 }
                             }
@@ -341,6 +350,92 @@
                 }
 
                 return canWePlayBoxY;
+            },
+
+            canWePlayBoxZ(boxId,idColorPlayer, boxItems){
+
+                let canWePlayBoxZ = {
+                    weCanPlay: false,
+                    boxSwitch: [],
+                    boxToStop: 0
+                };
+
+                let boxWeHaveToCheck = [];
+
+                canWePlayBoxZ.boxSwitch = findDiagForOnBox(boxId);
+
+                for(let i=0; i < canWePlayBoxZ.boxSwitch.length; i++){
+
+                    console.log('ok');
+
+                    let responseBoxToSwich = findDiagForOnBox(canWePlayBoxZ.boxSwitch[i])
+
+                    canWePlayBoxZ.boxSwitch = canWePlayBoxZ.boxSwitch.concat(responseBoxToSwich);
+
+                    // If we find diag with the same color, is the color to stop
+                    if(responseBoxToSwich.colorToSwitch == idColorPlayer){
+                        // This is the only scenario where we accept diag and we put weCanPlay to true
+                        canWePlayBoxZ.weCanPlay = true;
+                        canWePlayBoxZ.boxToStop = canWePlayBoxZ.boxToSwitch[i];
+
+                        break;
+                    }
+
+                    // If there is no more entry we have to stop
+                    if(responseBoxToSwich.boxToSwitch.length == 0){
+                        break;
+                    }
+                }
+
+                // We need to find case that on the - 1 line X or + 1 line X and that in same Y linef
+
+                function findDiagForOnBox(boxId)
+                {
+                    let boxDiag = {
+                        boxToSwitch: [],
+                        colorToSwitch: ''
+                    };
+
+                    if(boxItems[boxId].lines.x > 1){
+                        boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x - 1])
+                    }
+
+                    if(boxItems[boxId].lines.x < 8){
+                        boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x + 1])
+                    }
+
+                    // We going to see in these two line, the 4 cases that can be a diagonale
+                    for(let boxCheck of boxWeHaveToCheck){
+
+                        let itsADiag = false;
+
+                        // cause there is no diag on 8 or 1 in y dimension next
+                        if(boxItems[boxId].lines.y - 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y > 1){
+                            itsADiag = true;
+                        }
+
+                        // cause there is no diag on 8 or 1 in y dimension next
+                        if(boxItems[boxId].lines.y + 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y < 8){
+                            itsADiag = true;
+                        }
+
+                        if(itsADiag){
+                            // We have to valide that is a box only if it's an adverse button and it's active
+                            if(boxItems.activeBox.indexOf(boxCheck) !== -1 && boxItems[boxCheck].color != idColorPlayer){
+                                // this is a real diagonal that can be use for make point
+                                boxDiag.boxToSwitch.push(boxCheck);
+                                boxDiag.colorToSwitch = boxItems[boxCheck].color;
+                            } else if (boxItems[boxCheck].color == idColorPlayer){
+                                // If it's active but it's black this is the end of the parcours line
+                                boxDiag.colorToSwitch = idColorPlayer;
+                            }
+                        }
+                    }
+
+                    return boxDiag;
+                }
+
+                return canWePlayBoxZ;
             },
 
             turnToIA: function(){

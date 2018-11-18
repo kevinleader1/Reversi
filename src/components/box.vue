@@ -1,5 +1,6 @@
 <template>
     <div class="box" @click="$parent.activeBox(boxId, 0)">
+        <p>{{boxId}}</p>
         <pawn :boxId="boxId"></pawn>
     </div>
 </template>
