@@ -26,19 +26,15 @@
 
                     28: {
                         color: isBlack,
-                        active: true,
                     },
                     29: {
                         color: isWhite,
-                        active: true,
                     },
                     36: {
                         color: isWhite,
-                        active: true,
                     },
                     37: {
                         color: isBlack,
-                        active: true,
                     },
 
                     lines: {

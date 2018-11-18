@@ -20,7 +20,7 @@
         transition: 0.4s all;
 
         &.active {
-            display: inline;
+            display: inline-block;
             opacity: 1;
         }
 
@@ -28,12 +28,14 @@
             transform: rotateY(0deg);
             box-shadow: 0px 5px 0px 0px #fff;
             background-color: #333;
+            display:inline-block;
         }
 
         &.white {
             transform: rotateY(180deg);
             box-shadow: 0px 5px 0px 0px #333;
             background-color: #fff;
+            display:inline-block;
          }
     }
 </style>

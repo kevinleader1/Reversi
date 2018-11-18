@@ -21,6 +21,17 @@
 
                 if(canWePlayBox.weCanPlay){
                     // We going to switch box in boxSwitch if it's the player
+                    if(idColorPlayer == 0){
+
+                        this.switchBoxColor(canWePlayBox.boxSwitch, idColorPlayer);
+
+                        this.$parent.boxItems.activeBox.push(boxId);
+                    }
+                }
+            },
+            switchBoxColor(boxToSwitch, idColorPlayer){
+                for (let boxSwitch of boxToSwitch){
+                    this.$parent.boxItems[boxSwitch].color = idColorPlayer;
                 }
             },
             canWePlayBox(boxId, idColorPlayer){
@@ -29,8 +40,6 @@
                     weCanPlay: false,
                     boxSwitch: []
                 };
-
-                let boxSwitch = [];
 
                 if(typeof(boxId) != 'undefined'){
 
@@ -49,7 +58,7 @@
 
                         if(canWePLayX.weCanPlay){
                             canWePlayBox.weCanPlay = true;
-                            boxSwitch = boxSwitch.concat(canWePLayX.boxSwitch);
+                            canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayX.boxSwitch);
                         }
 
                         /*
@@ -57,11 +66,14 @@
                          ----                           ---
                          */
 
-                        let canWePLayY = this.canWePlayBoxY(boxId,idColorPlayer, boxItems);
+                        // Only if we don't have near same color on X
+                        if(canWePLayX.blockNearNotSameColor != null && canWePLayX.blockNearNotSameColor) {
+                            let canWePLayY = this.canWePlayBoxY(boxId, idColorPlayer, boxItems);
 
-                        if(canWePLayY.weCanPlay){
-                            canWePlayBox.weCanPlay = true;
-                            boxSwitch = boxSwitch.concat(canWePLayY.boxSwitch);
+                            if (canWePLayY.weCanPlay) {
+                                canWePlayBox.weCanPlay = true;
+                                canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayY.boxSwitch);
+                            }
                         }
                     }
 
@@ -76,6 +88,7 @@
                 let canWePlayBoxX = {
                     weCanPlay: false,
                     boxSwitch: [],
+                    blockNearNotSameColor: null,
                     boxToStop: 0
                 };
 
@@ -85,24 +98,34 @@
                 if(boxItems.activeBox.indexOf(boxId - 1) !== -1){
                     // We can play only if is not the same color that we play 0 is player 1 computer
                     if(boxItems[boxId - 1].color != idColorPlayer){
+                        canWePlayBoxX.blockNearNotSameColor = true;
                         wePossibilityCanPlay = true;
+                    } else {
+                        canWePlayBoxX.blockNearNotSameColor = false;
                     }
                 } else if (boxItems.activeBox.indexOf(boxId + 1) !== -1) {
                     if(boxItems[boxId + 1].color != idColorPlayer){
+                        canWePlayBoxX.blockNearNotSameColor = true;
                         wePossibilityCanPlay = true;
+                    } else {
+                        canWePlayBoxX.blockNearNotSameColor = false;
                     }
+                } else {
+                    // If none is active, we only put blockNearNotSameColor to true for Y logique
+                    canWePlayBoxX.blockNearNotSameColor = true;
                 }
 
                 if(wePossibilityCanPlay){
 
-                    boxItems.lines.x[boxItems[boxId].lines.x].forEach(function(boxInLineX){
-                        // We need to find an item active AND that is the current color player
+                    for(let boxInLineX of boxItems.lines.x[boxItems[boxId].lines.x]){
                         if(boxItems.activeBox.indexOf(boxInLineX) !== -1 && boxItems[boxInLineX].color === idColorPlayer){
                             // Only one is need for can play
                             canWePlayBoxX.weCanPlay = true;
                             canWePlayBoxX.boxToStop = boxInLineX;
+
+                            break;
                         }
-                    });
+                    }
 
                     // If we can play we going to add in array the box that will be switch
                     if(canWePlayBoxX.weCanPlay){
@@ -130,42 +153,49 @@
 
                 let wePossibilityCanPlay = false;
 
+                let boxWeHaveToCheck = [];
+
+                // We need to find case that on the - 1 line X or + 1 line X and that in same Y line
+                boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x - 1], boxItems.lines.x[boxItems[boxId].lines.x + 1]);
+
+                let boxItemY = [];
+
                 for(let i=0; i < boxItems.lines.y[boxItems[boxId].lines.y].length; i++){
-                    console.log(boxItems.lines.y[boxItems[boxId].lines.y][i])
+                    if(boxWeHaveToCheck.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1){
+                        boxItemY.push(boxItems.lines.y[boxItems[boxId].lines.y][i]);
+                    }
                 }
 
-                // Check in X line is easy, we have just to add 1 and -1 to verify is box is active or not
-                if(boxItems.activeBox.indexOf() !== -1){
-                    // We can play only if is not the same color that we play 0 is player 1 computer
-                    if(boxItems[boxId - 1].color != idColorPlayer){
-                        wePossibilityCanPlay = true;
-                    }
-                } else if (boxItems.activeBox.indexOf(boxId + 1) !== -1) {
-                    if(boxItems[boxId + 1].color != idColorPlayer){
+                for(let j=0; j < boxItemY.length; j++){
+                    if(boxItems[boxItemY[j]].color != idColorPlayer){
                         wePossibilityCanPlay = true;
                     }
                 }
 
                 if(wePossibilityCanPlay){
 
-                    boxItems.lines.x[boxItems[boxId].lines.x].forEach(function(boxInLineX){
-                        // We need to find an item active AND that is the current color player
-                        if(boxItems.activeBox.indexOf(boxInLineX) !== -1 && boxItems[boxInLineX].color === idColorPlayer){
+                    for(let boxInLineY of boxItems.lines.y[boxItems[boxId].lines.y]){
+                        if(boxItems.activeBox.indexOf(boxInLineY) !== -1 && boxItems[boxInLineY].color === idColorPlayer){
                             // Only one is need for can play
-                            canWePlayBoxX.weCanPlay = true;
-                            canWePlayBoxX.boxToStop = boxInLineX;
+                            canWePlayBoxY.weCanPlay = true;
+                            canWePlayBoxY.boxToStop = boxInLineY;
+
+                            break;
                         }
-                    });
+                    }
 
                     // If we can play we going to add in array the box that will be switch
-                    if(canWePlayBoxX.weCanPlay){
+                    if(canWePlayBoxY.weCanPlay){
                         // We make a for to parcours the smaller to the biggest
-                        let biggestItem = Math.max(canWePlayBoxX.boxToStop, boxId),
-                                smallerItem = Math.min(canWePlayBoxX.boxToStop, boxId),
+                        let biggestItem = Math.max(canWePlayBoxY.boxToStop, boxId),
+                                smallerItem = Math.min(canWePlayBoxY.boxToStop, boxId),
                                 nextItem = smallerItem + 1;
 
                         for(nextItem; nextItem < biggestItem; nextItem++){
-                            canWePlayBoxX.boxSwitch.push(nextItem);
+                            // Only if there are on the same line !
+                            if(boxItems[nextItem].lines.y === boxItems[boxId].lines.y){
+                                canWePlayBoxY.boxSwitch.push(nextItem);
+                            }
                         }
                     }
                 }
