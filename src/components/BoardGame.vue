@@ -24,7 +24,6 @@
                     activeBox: [28, 29, 36, 37],
                     isBlack : 0,
                     isWhite : 1,
-                    invisble: 2,
 
                     28: {
                         color: isBlack,
@@ -48,10 +47,11 @@
 
             // Default, all pawn are dark for work with hover preview
             for(let i=1; i <= 64; i++){
+
                 // Only if is not yet set for avoid erasing previous proprities
                 if(typeof(boxItemsObject.boxItems[i]) == 'undefined'){
                     boxItemsObject.boxItems[i] = {
-                        'color' : boxItemsObject.boxItems.invisible
+                        'color' : ''
                     }
                 }
 
@@ -131,14 +131,21 @@
 
                         this.switchBoxColor(canWePlayBox.boxSwitch, idColorPlayer);
 
+                        // Color of box for player !
+                        this.boxItems[boxId].color = idColorPlayer;
                         this.boxItems.activeBox.push(boxId);
                     }
 
                     canWePlayBox.boxPlayed = boxId;
 
-                    // We going to call the IA for she play
+                    // We going to call the IA for she play. We temporise because is too quick
                     if(idColorPlayer == 0) {
-                        this.turnToIA();
+                        let vueThis = this;
+
+                        this.$parent.game.playerCanPlay = false;
+                        setTimeout(function(){
+                            vueThis.turnToIA();
+                        }, 1000);
                     } else if (idColorPlayer == 1){
                         this.$parent.game.playerCanPlay = true;
                     }
@@ -186,13 +193,11 @@
                          */
 
                         // Only if we don't have near same color on X
-                        if(canWePLayX.blockNearNotSameColor != null && canWePLayX.blockNearNotSameColor) {
-                            let canWePLayY = this.canWePlayBoxY(boxId, idColorPlayer, boxItems);
+                        let canWePLayY = this.canWePlayBoxY(boxId, idColorPlayer, boxItems);
 
-                            if (canWePLayY.weCanPlay) {
-                                canWePlayBox.weCanPlay = true;
-                                canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayY.boxSwitch);
-                            }
+                        if (canWePLayY.weCanPlay) {
+                            canWePlayBox.weCanPlay = true;
+                            canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayY.boxSwitch);
                         }
                     }
 
@@ -290,7 +295,7 @@
 
                 for(let i=0; i < boxItems.lines.y[boxItems[boxId].lines.y].length; i++){
                     // Only if the box is on the same line and if the box is active
-                    if(boxWeHaveToCheck.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1 && boxItems.activeBox.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i])){
+                    if(boxWeHaveToCheck.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1 && boxItems.activeBox.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1){
                         boxItemY.push(boxItems.lines.y[boxItems[boxId].lines.y][i]);
                     }
                 }
@@ -321,9 +326,15 @@
                                 nextItem = smallerItem + 1;
 
                         for(nextItem; nextItem < biggestItem; nextItem++){
-                            // Only if there are on the same line !
+                            // Only if there are on the same line
                             if(boxItems[nextItem].lines.y === boxItems[boxId].lines.y){
-                                canWePlayBoxY.boxSwitch.push(nextItem);
+                                if(this.boxItems.activeBox.indexOf(nextItem) !== -1) {
+                                    canWePlayBoxY.boxSwitch.push(nextItem);
+                                } else {
+                                    // If there is one empty box, cut. We cannot make bridge in this game !
+                                    canWePlayBoxY.boxSwitch = []  ;
+                                    canWePlayBoxY.weCanPlay = false;
+                                }
                             }
                         }
                     }
@@ -333,8 +344,6 @@
             },
 
             turnToIA: function(){
-                this.$parent.game.playerCanPlay = false;
-
                 let boxToPlay = {
                     id: 0,
                     numberSwitch: 0

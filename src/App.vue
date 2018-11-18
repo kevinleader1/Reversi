@@ -72,7 +72,7 @@
     height: 25%;
     width: 25%;
     display: inline-block;
-    transition: top 3s;
+    transition: top 1s;
 
     &.show {
       top: 50px;
