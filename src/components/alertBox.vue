@@ -13,7 +13,7 @@
         data(){
             return {
                 messageToShow: {
-                    start: "Good luck. KL",
+                    start: "Good luck =)",
                     yourTurn: "It's your turn.",
                     computerTurn: "It's computer turn."
                 }

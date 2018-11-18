@@ -107,8 +107,256 @@
             return boxItemsObject;
         },
         methods: {
+
+            activeBox(boxId, idColorPlayer, test) {
+
+                if(typeof(test) == 'undefined'){
+                    test = false;
+                }
+
+                // If it's the reel player we make sur he can play
+                if(idColorPlayer == 0){
+                    if(!this.$parent.game.playerCanPlay){
+                        return false;
+                    }
+                }
+                // We going to start if we can play in this box
+                let canWePlayBox = this.canWePlayBox(boxId, idColorPlayer);
+
+                if(canWePlayBox.weCanPlay){
+
+                    // if it's not test, we going to switch box in boxSwitch
+                    if(!test){
+
+                        this.switchBoxColor(canWePlayBox.boxSwitch, idColorPlayer);
+
+                        this.boxItems.activeBox.push(boxId);
+                    }
+
+                    canWePlayBox.boxPlayed = boxId;
+
+                    // We going to call the IA for she play
+                    if(idColorPlayer == 0) {
+                        this.turnToIA();
+                    } else if (idColorPlayer == 1){
+                        this.$parent.game.playerCanPlay = true;
+                    }
+                }
+
+                return canWePlayBox;
+            },
+            switchBoxColor(boxToSwitch, idColorPlayer){
+                for (let boxSwitch of boxToSwitch){
+                    this.boxItems[boxSwitch].color = idColorPlayer;
+                }
+            },
+            canWePlayBox(boxId, idColorPlayer){
+
+                let canWePlayBox = {
+                    weCanPlay: false,
+                    boxSwitch: []
+                };
+
+                if(typeof(boxId) != 'undefined'){
+
+                    let boxItems = this.boxItems;
+
+                    // If is not a yet item active
+                    if(boxItems.activeBox.indexOf(boxId) == -1){
+                        // We need to check if box have another box around to have the possibility to play
+
+                        /*
+                         ---- Start with X verification ---
+                         ----                           ---
+                         */
+
+                        let canWePLayX = this.canWePlayBoxX(boxId,idColorPlayer, boxItems);
+
+                        if(canWePLayX.weCanPlay){
+                            canWePlayBox.weCanPlay = true;
+                            canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayX.boxSwitch);
+                        }
+
+                        /*
+                         ---- Start with Y verification ---
+                         ----                           ---
+                         */
+
+                        // Only if we don't have near same color on X
+                        if(canWePLayX.blockNearNotSameColor != null && canWePLayX.blockNearNotSameColor) {
+                            let canWePLayY = this.canWePlayBoxY(boxId, idColorPlayer, boxItems);
+
+                            if (canWePLayY.weCanPlay) {
+                                canWePlayBox.weCanPlay = true;
+                                canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayY.boxSwitch);
+                            }
+                        }
+                    }
+
+                } else {
+                    console.error('Error, no boxId selected');
+                }
+
+                return canWePlayBox;
+            },
+            canWePlayBoxX(boxId,idColorPlayer, boxItems){
+
+                let canWePlayBoxX = {
+                    weCanPlay: false,
+                    boxSwitch: [],
+                    blockNearNotSameColor: null,
+                    boxToStop: 0
+                };
+
+                let wePossibilityCanPlay = false;
+
+                // Check in X line is easy, we have just to add 1 and -1 to verify is box is active or not
+                if(boxItems.activeBox.indexOf(boxId - 1) !== -1){
+                    // We can play only if is not the same color that we play 0 is player 1 computer
+                    if(boxItems[boxId - 1].color != idColorPlayer){
+                        canWePlayBoxX.blockNearNotSameColor = true;
+                        wePossibilityCanPlay = true;
+                    } else {
+                        canWePlayBoxX.blockNearNotSameColor = false;
+                    }
+                } else if (boxItems.activeBox.indexOf(boxId + 1) !== -1) {
+                    if(boxItems[boxId + 1].color != idColorPlayer){
+                        canWePlayBoxX.blockNearNotSameColor = true;
+                        wePossibilityCanPlay = true;
+                    } else {
+                        canWePlayBoxX.blockNearNotSameColor = false;
+                    }
+                } else {
+                    // If none is active, we only put blockNearNotSameColor to true for Y logique
+                    canWePlayBoxX.blockNearNotSameColor = true;
+                }
+
+                if(wePossibilityCanPlay){
+
+                    for(let boxInLineX of boxItems.lines.x[boxItems[boxId].lines.x]){
+                        if(boxItems.activeBox.indexOf(boxInLineX) !== -1 && boxItems[boxInLineX].color === idColorPlayer){
+                            // Only one is need for can play
+                            canWePlayBoxX.weCanPlay = true;
+                            canWePlayBoxX.boxToStop = boxInLineX;
+
+                            break;
+                        }
+                    }
+
+                    // If we can play we going to add in array the box that will be switch
+                    if(canWePlayBoxX.weCanPlay){
+                        // We make a for to parcours the smaller to the biggest
+                        let biggestItem = Math.max(canWePlayBoxX.boxToStop, boxId),
+                                smallerItem = Math.min(canWePlayBoxX.boxToStop, boxId),
+                                nextItem = smallerItem + 1;
+
+                        for(nextItem; nextItem < biggestItem; nextItem++){
+                            canWePlayBoxX.boxSwitch.push(nextItem);
+                        }
+                    }
+                }
+
+                return canWePlayBoxX;
+            },
+
+            canWePlayBoxY(boxId,idColorPlayer, boxItems){
+
+                let canWePlayBoxY = {
+                    weCanPlay: false,
+                    boxSwitch: [],
+                    boxToStop: 0
+                };
+
+                let wePossibilityCanPlay = false;
+
+                let boxWeHaveToCheck = [];
+
+                // We need to find case that on the - 1 line X or + 1 line X and that in same Y linef
+
+                if(boxItems[boxId].lines.x > 1){
+                    boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x - 1])
+                }
+
+                if(boxItems[boxId].lines.x < 8){
+                    boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x + 1])
+                }
+
+                let boxItemY = [];
+
+                for(let i=0; i < boxItems.lines.y[boxItems[boxId].lines.y].length; i++){
+                    if(boxWeHaveToCheck.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1){
+                        boxItemY.push(boxItems.lines.y[boxItems[boxId].lines.y][i]);
+                    }
+                }
+
+                for(let j=0; j < boxItemY.length; j++){
+                    if(boxItems[boxItemY[j]].color != idColorPlayer){
+                        wePossibilityCanPlay = true;
+                    }
+                }
+
+                if(wePossibilityCanPlay){
+
+                    for(let boxInLineY of boxItems.lines.y[boxItems[boxId].lines.y]){
+                        if(boxItems.activeBox.indexOf(boxInLineY) !== -1 && boxItems[boxInLineY].color === idColorPlayer){
+                            // Only one is need for can play
+                            canWePlayBoxY.weCanPlay = true;
+                            canWePlayBoxY.boxToStop = boxInLineY;
+
+                            break;
+                        }
+                    }
+
+                    // If we can play we going to add in array the box that will be switch
+                    if(canWePlayBoxY.weCanPlay){
+                        // We make a for to parcours the smaller to the biggest
+                        let biggestItem = Math.max(canWePlayBoxY.boxToStop, boxId),
+                                smallerItem = Math.min(canWePlayBoxY.boxToStop, boxId),
+                                nextItem = smallerItem + 1;
+
+                        for(nextItem; nextItem < biggestItem; nextItem++){
+                            // Only if there are on the same line !
+                            if(boxItems[nextItem].lines.y === boxItems[boxId].lines.y){
+                                canWePlayBoxY.boxSwitch.push(nextItem);
+                            }
+                        }
+                    }
+                }
+
+                return canWePlayBoxY;
+            },
+
             turnToIA: function(){
                 this.$parent.game.playerCanPlay = false;
+
+                let boxToPlay = {
+                    id: 0,
+                    numberSwitch: 0
+                };
+
+                // We going to search for all the line what is the line who will gain the most benefit
+                for(let i=1; i <= 64; i++){
+                    // Id color player 1 for computer
+                    let responseSimulatePlay = this.activeBox(i, 1, true);
+
+                    if(responseSimulatePlay.weCanPlay == true){
+                        if(responseSimulatePlay.boxSwitch.length > boxToPlay.numberSwitch){
+                            // the new best choice
+
+                            console.log(responseSimulatePlay);
+                            boxToPlay.numberSwitch = responseSimulatePlay.boxSwitch.length;
+                            boxToPlay.id = responseSimulatePlay.boxPlayed
+                        }
+                    }
+                }
+
+                if(boxToPlay.numberSwitch > 0){
+                    // Simulation finish we can realy play
+                    this.activeBox(boxToPlay.id, 1);
+                } else {
+                    // You Win !
+                    alert('victoire !')
+                }
             }
         }
     }

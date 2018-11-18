@@ -2,6 +2,7 @@
   <div id="app">
     <boardGame :playerCanPlay="game.playerCanPlay"/>
     <alertBox :class="{'visible' : alertBox.displayMessage}" :message="alertBox.message" />
+    <img src="/src/assets/imgs/robot.svg" />
   </div>
 </template>
 
