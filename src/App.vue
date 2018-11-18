@@ -1,16 +1,40 @@
 <template>
   <div id="app">
     <boardGame/>
+    <alertBox :class="{'visible' : alertBox.displayMessage}" :message="alertBox.message" />
   </div>
 </template>
 
 <script>
   import boardGame from './components/boardGame.vue'
+  import alertBox from './components/alertBox.vue'
 
   export default {
     name: 'app',
     components: {
-      boardGame
+      boardGame,
+      alertBox
+    },
+    data() {
+      return {
+        alertBox: {
+          message: 'start',
+          displayMessage: false
+        }
+      }
+    },
+    mounted() {
+      // We going to appar message for start playinf
+      var viewThis = this;
+
+      setTimeout(function(){
+        viewThis.alertBox.displayMessage = true;
+
+        // send away message after 2 secondes
+        setTimeout(function(){
+          viewThis.alertBox.displayMessage = false;
+        }, 2500);
+      }, 1000);
     }
   }
 </script>

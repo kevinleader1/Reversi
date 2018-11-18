@@ -1,6 +1,5 @@
 <template>
     <div class="box" @click="activeBox(boxId, 0)">
-        {{boxId}}
         <pawn :boxId="boxId"></pawn>
     </div>
 </template>

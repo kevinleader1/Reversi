@@ -104,7 +104,7 @@
             }
 
             return boxItemsObject;
-        }
+        },
     }
 </script>
 
@@ -117,7 +117,7 @@
         box-sizing: border-box;
         background-color: #32bb85;
         width: 100%;
-        max-width: 800px;
+        max-width: 600px;
         height: 100%;
         position: fixed;
         top: 0;

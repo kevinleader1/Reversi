@@ -25,15 +25,15 @@
         }
 
         &.black {
-            transform: rotateY(0deg);
-            box-shadow: 0px 5px 0px 0px #fff;
+            transform: rotateY(180deg);
+            box-shadow: 0 5px 0 0 #fff;
             background-color: #333;
             display:inline-block;
         }
 
         &.white {
-            transform: rotateY(180deg);
-            box-shadow: 0px 5px 0px 0px #333;
+            transform: rotateY(360deg);
+            box-shadow: 0 5px 0 0 #333;
             background-color: #fff;
             display:inline-block;
          }
