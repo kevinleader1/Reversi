@@ -14,8 +14,7 @@
             return {
                 messageToShow: {
                     start: "Good luck =)",
-                    yourTurn: "It's your turn.",
-                    computerTurn: "It's computer turn."
+                    victory: "You beat me congratulation :0 ! Reload the page to replay"
                 }
             }
         }
@@ -42,7 +41,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 5px;
+        padding: 10px;
+        text-align: center;
         border-radius: 5px;
         box-shadow: 2px 2px 13px 2px #5f5f5f;
         transition: 1s top;

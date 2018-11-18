@@ -24,6 +24,7 @@
                     activeBox: [28, 29, 36, 37],
                     isBlack : 0,
                     isWhite : 1,
+                    invisble: 2,
 
                     28: {
                         color: isBlack,
@@ -50,7 +51,7 @@
                 // Only if is not yet set for avoid erasing previous proprities
                 if(typeof(boxItemsObject.boxItems[i]) == 'undefined'){
                     boxItemsObject.boxItems[i] = {
-                        'color' : boxItemsObject.boxItems.isBlack
+                        'color' : boxItemsObject.boxItems.invisible
                     }
                 }
 
@@ -177,6 +178,8 @@
                             canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayX.boxSwitch);
                         }
 
+                        console.log(canWePlayBox)
+
                         /*
                          ---- Start with Y verification ---
                          ----                           ---
@@ -210,8 +213,9 @@
 
                 let wePossibilityCanPlay = false;
 
-                // Check in X line is easy, we have just to add 1 and -1 to verify is box is active or not
-                if(boxItems.activeBox.indexOf(boxId - 1) !== -1){
+                // Check in X line is easy, we have just to add 1 and -1 to verify is box is active or not but we have to ensure that the number is on the same line
+
+                if(boxItems.activeBox.indexOf(boxId - 1) !== -1 && boxItems[boxId - 1].lines.x == boxItems[boxId].lines.x){
                     // We can play only if is not the same color that we play 0 is player 1 computer
                     if(boxItems[boxId - 1].color != idColorPlayer){
                         canWePlayBoxX.blockNearNotSameColor = true;
@@ -219,7 +223,8 @@
                     } else {
                         canWePlayBoxX.blockNearNotSameColor = false;
                     }
-                } else if (boxItems.activeBox.indexOf(boxId + 1) !== -1) {
+                } else if (boxItems.activeBox.indexOf(boxId + 1) !== -1 && boxItems[boxId + 1].lines.x == boxItems[boxId].lines.x) {
+
                     if(boxItems[boxId + 1].color != idColorPlayer){
                         canWePlayBoxX.blockNearNotSameColor = true;
                         wePossibilityCanPlay = true;
@@ -284,7 +289,8 @@
                 let boxItemY = [];
 
                 for(let i=0; i < boxItems.lines.y[boxItems[boxId].lines.y].length; i++){
-                    if(boxWeHaveToCheck.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1){
+                    // Only if the box is on the same line and if the box is active
+                    if(boxWeHaveToCheck.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i]) !== -1 && boxItems.activeBox.indexOf(boxItems.lines.y[boxItems[boxId].lines.y][i])){
                         boxItemY.push(boxItems.lines.y[boxItems[boxId].lines.y][i]);
                     }
                 }
@@ -294,10 +300,10 @@
                         wePossibilityCanPlay = true;
                     }
                 }
-
                 if(wePossibilityCanPlay){
 
                     for(let boxInLineY of boxItems.lines.y[boxItems[boxId].lines.y]){
+
                         if(boxItems.activeBox.indexOf(boxInLineY) !== -1 && boxItems[boxInLineY].color === idColorPlayer){
                             // Only one is need for can play
                             canWePlayBoxY.weCanPlay = true;
@@ -342,8 +348,6 @@
                     if(responseSimulatePlay.weCanPlay == true){
                         if(responseSimulatePlay.boxSwitch.length > boxToPlay.numberSwitch){
                             // the new best choice
-
-                            console.log(responseSimulatePlay);
                             boxToPlay.numberSwitch = responseSimulatePlay.boxSwitch.length;
                             boxToPlay.id = responseSimulatePlay.boxPlayed
                         }
@@ -355,7 +359,7 @@
                     this.activeBox(boxToPlay.id, 1);
                 } else {
                     // You Win !
-                    alert('victoire !')
+                    this.$parent.showMessage('victory');
                 }
             }
         }

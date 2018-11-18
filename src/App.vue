@@ -2,7 +2,7 @@
   <div id="app">
     <boardGame :playerCanPlay="game.playerCanPlay"/>
     <alertBox :class="{'visible' : alertBox.displayMessage}" :message="alertBox.message" />
-    <img src="/src/assets/imgs/robot.svg" />
+    <img :class="{'show': !game.playerCanPlay ,'hide' : game.playerCanPlay}" id="yourRobotOpponent" src="./assets/imgs/svg/robot.svg" />
   </div>
 </template>
 
@@ -41,11 +41,18 @@
           viewThis.game.playerCanPlay = true;
         }, 2500);
       }, 500);
+    },
+    methods: {
+      showMessage(){
+        this.alertBox.message = 'victory';
+
+        this.alertBox.displayMessage = true;
+      }
     }
   }
 </script>
 
-<style>
+<style lang="less" scoped>
   body,html, #app {
     width: 100%;
     height: 100%;
@@ -54,5 +61,25 @@
   body,html, #app {
     padding: 0;
     margin: 0
+  }
+
+  #yourRobotOpponent {
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: 0;
+    height: 25%;
+    width: 25%;
+    display: inline-block;
+    transition: top 3s;
+
+    &.show {
+      top: 50px;
+    }
+
+    &.hide {
+      top: -100%
+    }
   }
 </style>
