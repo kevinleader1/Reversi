@@ -1,5 +1,5 @@
 <template>
-    <div class="pawn" :class="{'active': this.$parent.$parent.pawnItem.activeByDefault.indexOf(boxId) !== -1, 'black' : typeof(this.$parent.$parent.pawnItem[this.boxId]) != 'undefined' && this.$parent.$parent.pawnItem[this.boxId].color == this.$parent.$parent.pawnItem.isBlack, 'white' : typeof(this.$parent.$parent.pawnItem[this.boxId]) != 'undefined' && this.$parent.$parent.pawnItem[this.boxId].color == this.$parent.$parent.pawnItem.isWhite}"></div>
+    <div class="pawn" :class="{'active': this.$parent.$parent.boxItems.activeBox.indexOf(boxId) !== -1, 'black' : this.$parent.$parent.boxItems[this.boxId].color == this.$parent.$parent.boxItems.isBlack, 'white' : this.$parent.$parent.boxItems[this.boxId].color == this.$parent.$parent.boxItems.isWhite}"></div>
 </template>
 
 <script>
@@ -18,12 +18,10 @@
         border-radius: 100%;
         opacity: 0;
         transition: 0.4s all;
-        cursor:pointer;
 
         &.active {
             display: inline;
             opacity: 1;
-            cursor: default;
         }
 
         &.black {
