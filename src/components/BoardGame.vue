@@ -1,5 +1,5 @@
 <template>
-    <div id="bordGame">
+    <div id="bordGame" :class="{'playerCantPlay' : !playerCanPlay}">
         <box v-for="n in 64" :boxId="n"></box>
     </div>
 </template>
@@ -9,6 +9,7 @@
 
     export default {
         name: 'BoardGame',
+        props: ['playerCanPlay'],
         components: {
             box
         },
@@ -105,6 +106,11 @@
 
             return boxItemsObject;
         },
+        methods: {
+            turnToIA: function(){
+                this.$parent.game.playerCanPlay = false;
+            }
+        }
     }
 </script>
 
@@ -127,5 +133,21 @@
         margin: auto;
         border: 20px solid #5d290f;
         border-image: repeating-linear-gradient(30deg, #88421D, #85530F, #7E3300 20px) 60;
+    }
+</style>
+
+<style lang="less">
+    #bordGame {
+        &.playerCantPlay{
+             cursor: default;
+
+            .box {
+                cursor: default !important;
+
+                &:hover .pawn:not(.active){
+                     opacity: 0 !important;
+                 }
+            }
+        }
     }
 </style>

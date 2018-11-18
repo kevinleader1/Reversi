@@ -15,6 +15,13 @@
         },
         methods: {
             activeBox(boxId, idColorPlayer) {
+                // Si il s'agit du joeur
+                if(idColorPlayer == 0){
+                    // Si il ne peux pas jouer on ne fait rien
+                    if(!this.$parent.$parent.game.playerCanPlay){
+                        return false;
+                    }
+                }
                 // We going to start if we can play in this box
                 let canWePlayBox = this.canWePlayBox(boxId, idColorPlayer);
 
@@ -25,6 +32,9 @@
                         this.switchBoxColor(canWePlayBox.boxSwitch, idColorPlayer);
 
                         this.$parent.boxItems.activeBox.push(boxId);
+
+                        // We going to call the IA for she play
+                        this.$parent.turnToIA();
                     }
                 }
             },

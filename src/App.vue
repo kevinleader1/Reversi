@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <boardGame/>
+    <boardGame :playerCanPlay="game.playerCanPlay"/>
     <alertBox :class="{'visible' : alertBox.displayMessage}" :message="alertBox.message" />
   </div>
 </template>
@@ -20,6 +20,9 @@
         alertBox: {
           message: 'start',
           displayMessage: false
+        },
+        game: {
+          playerCanPlay: false,
         }
       }
     },
@@ -33,8 +36,10 @@
         // send away message after 2 secondes
         setTimeout(function(){
           viewThis.alertBox.displayMessage = false;
+
+          viewThis.game.playerCanPlay = true;
         }, 2500);
-      }, 1000);
+      }, 500);
     }
   }
 </script>
