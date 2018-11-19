@@ -204,6 +204,8 @@
 
                         let canWePLayZ = this.canWePlayBoxZ(boxId, idColorPlayer, boxItems);
 
+                        console.log(canWePLayZ);
+
                         if (canWePLayZ.weCanPlay) {
                             canWePlayBox.weCanPlay = true;
                             canWePlayBox.boxSwitch = canWePlayBox.boxSwitch.concat(canWePLayZ.boxSwitch);
@@ -360,51 +362,60 @@
                     boxToStop: 0
                 };
 
-                canWePlayBoxZ.boxSwitch = findDiagForOnBox(boxId, canWePlayBoxZ.boxSwitch).boxToSwitch;
+                // The one diag for the item that true all time
+                let boxToSwitchDiags = findDiagForOnBox(boxId).boxToSwitch,
+                    boxToSwitchDiagsKey = Object.keys(boxToSwitchDiags),
+                    boxToSwitchDiagsValues = Object.values(boxToSwitchDiags);
 
-                for(let i=0; i < canWePlayBoxZ.boxSwitch.length ; i++){
 
-                    let responseBoxToSwich = findDiagForOnBox(canWePlayBoxZ.boxSwitch[i], canWePlayBoxZ.boxSwitch)
+                for(let i=0; i < boxToSwitchDiagsKey.length; i++){
 
-                    // If we find diag with the same color, is the color to stop
-                    if(responseBoxToSwich.boxToStop != 0){
+                    let diagPath = boxToSwitchDiagsValues[i],
+                        boxToSwitchFinal = [boxToSwitchDiagsKey[i]];
 
-                        // We have to see if the black end point it's a true end point diag in the same line than other boxSwitch
-                        if(boxItems[responseBoxToSwich.boxToStop].lines.x < boxItems[boxId].lines.x){
-                            if(boxItems[boxId].lines.x - boxItems[responseBoxToSwich.boxToStop].lines.x < canWePlayBoxZ.boxSwitch.length){
-                                // it's not possible, because is not the line that we purchase
-                                break;
-                            }
+                    recursiveCallDiagFind(boxToSwitchDiagsKey[i]);
+
+                    function recursiveCallDiagFind(boxToFindDiag)
+                    {
+                        let responseBoxToSwich = findDiagForOnBox(boxToFindDiag, diagPath);
+
+                        boxToSwitchFinal = boxToSwitchFinal.concat(Object.keys(responseBoxToSwich.boxToSwitch));
+
+                        // If we find diag with the same color, is the color to stop
+                        if(responseBoxToSwich.boxToStop != 0){
+
+                            // We have to see if the black end point it's a true end point diag in the same line than other boxSwitch
+                            // The first is the current diag of current element
+
+                            canWePlayBoxZ.boxSwitch = canWePlayBoxZ.boxSwitch.concat(boxToSwitchFinal);
+
+                            console.log( canWePlayBoxZ.boxSwitch);
+
+                            // This is the only scenario where we accept diag and we put weCanPlay to true
+                            canWePlayBoxZ.weCanPlay = true;
+                            canWePlayBoxZ.boxToStop = responseBoxToSwich.boxToStop;
+
+                            return true;
+
+                        } else if(Object.keys(responseBoxToSwich.boxToSwitch).length == 0){
+                            // Blank ! we can't play here
+                            return false;
                         } else {
-                            if(boxItems[responseBoxToSwich.boxToStop].lines.x - boxItems[boxId].lines.x < canWePlayBoxZ.boxSwitch.length){
-                                // it's not possible, because is not the line that we purchase
-                                break;
-                            }
+                            // We going to search diag of the next item ( []0 cause is the first of the list and there is only one when diagPath is specified )
+                            recursiveCallDiagFind(Object.keys(responseBoxToSwich.boxToSwitch)[0]);
                         }
-
-                        // This is the only scenario where we accept diag and we put weCanPlay to true
-                        canWePlayBoxZ.weCanPlay = true;
-                        canWePlayBoxZ.boxToStop = responseBoxToSwich.boxToStop;
-
-                        break;
                     }
 
-                    // If there is no more entry we have to stop
-                    if(responseBoxToSwich.boxToSwitch.length == 0){
-                        break;
-                    }
-
-                    // Sinon c'est bon on inject les reponses
-                    canWePlayBoxZ.boxSwitch = canWePlayBoxZ.boxSwitch.concat(responseBoxToSwich.boxToSwitch);
+                    console.log( canWePlayBoxZ.boxSwitch);
                 }
 
                 // We need to find case that on the - 1 line X or + 1 line X and that in same Y linef
 
-                function findDiagForOnBox(boxId, boxYetFound)
+                function findDiagForOnBox(boxId, diagPath)
                 {
                     let boxDiag = {
-                        boxToSwitch: [],
-                        boxToStop: 0
+                        boxToSwitch: {},
+                        boxToStop: 0,
                     };
 
                     let boxWeHaveToCheck = [];
@@ -417,41 +428,45 @@
                         boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x + 1])
                     }
 
-                    // We going to take off the box that we yet know boxYetFound
-                    for(let i=0; i < boxWeHaveToCheck.length ;i++){
-                        if(boxYetFound.indexOf(boxWeHaveToCheck[i]) !== -1){
-                            boxWeHaveToCheck.splice(i, 1);
-                        }
-                    }
-
                     // We going to see in these two line, the 4 cases that can be a diagonale
                     for (let boxCheck of boxWeHaveToCheck) {
 
-                        let itsADiag = false;
+                        let idDiag = null;
 
                         // cause there is no diag on 8 or 1 in y dimension next
                         if (boxItems[boxId].lines.y - 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y > 1) {
-                            itsADiag = true;
+                            if(boxItems[boxId].lines.x - 1 == boxItems[boxCheck].lines.x){
+                                idDiag = 'y-1_x-1';
+                            } else {
+                                idDiag = 'y-1_x+1';
+                            }
                         }
 
                         // cause there is no diag on 8 or 1 in y dimension next
                         if (boxItems[boxId].lines.y + 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y < 8) {
-                            itsADiag = true;
+                            if(boxItems[boxId].lines.x + 1 == boxItems[boxCheck].lines.x){
+                                idDiag = 'y+1_x+1';
+                            } else {
+                                idDiag = 'y+1_x-1';
+                            }
                         }
 
-                        if (itsADiag) {
+                        if (idDiag !== null) {
                             // If the box is empty, systeme will stop automatique
                             if (boxItems.activeBox.indexOf(boxCheck) !== -1) {
-                                // We have to valide that is a box only if it's an adverse button and it's active
 
-                                console.log(boxItems[boxCheck].color);
-                                if (boxItems[boxCheck].color != idColorPlayer) {
-                                    // this is a real diagonal that can be use for make point
-                                    boxDiag.boxToSwitch.push(boxCheck);
-                                    boxDiag.colorToSwitch = boxItems[boxCheck].color;
-                                } else if (boxItems[boxCheck].color == idColorPlayer) {
-                                    // If it's active but it's black this is the end of the parcours line
-                                    boxDiag.boxToStop = boxCheck;
+                                // If there is a diagPath we want exactly that the box correspond to diag path
+                                if(typeof(diagPath) != 'undefined' && idDiag != diagPath){
+
+                                } else {
+                                    // We have to valide that is a box only if it's an adverse button and it's active
+                                    if (boxItems[boxCheck].color != idColorPlayer) {
+                                        // this is a real diagonal that can be use for make point
+                                        boxDiag.boxToSwitch[boxCheck] = idDiag;
+                                    } else if (boxItems[boxCheck].color == idColorPlayer) {
+                                        // If it's active but it's black this is the end of the parcours line
+                                        boxDiag.boxToStop = boxCheck;
+                                    }
                                 }
                             }
                         }
@@ -493,15 +508,15 @@
 
             checkIfIsTheEnd(){
                 // If all box are activate 64 box
-                if(this.boxItems.activeBox.length >= 63){
+                if(this.boxItems.activeBox.length > 63){
                     let score = this.calculScore();
 
                     if(score.playerScore > score.robotScore){
-                        this.$parent.showMessage('VictoryUser');
+                        this.$parent.showMessage('VictoryUser', score);
                     } else if (score.playerScore < score.robotScore){
-                        this.$parent.showMessage('VictoryRobot');
+                        this.$parent.showMessage('VictoryRobot', score);
                     } else {
-                        this.$parent.showMessage('scoreEgality');
+                        this.$parent.showMessage('scoreEgality', score);
                     }
                 }
             },

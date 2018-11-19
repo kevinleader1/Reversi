@@ -1,6 +1,6 @@
 <template>
     <div id="alertMessage">
-        <p>{{messageToShow[message]}}</p>
+        <p v-html="messageToShow[message]"></p>
     </div>
 </template>
 
@@ -8,15 +8,16 @@
     export default {
         name: 'alertBox',
         props: [
-            'message'
+            'message',
+            'params'
         ],
         data(){
             return {
                 messageToShow: {
                     start: "Good luck =)",
-                    VictoryUser: "You beat me congratulation :0 ! Reload the page to replay",
-                    VictoryRobot: "I win ! Maybe next time ;) Reload the page to replay",
-                    scoreEgality: "Incredible.. Perfect equality ! Reload the page to replay"
+                    VictoryUser: this.params.robotScore + ' - ' + this.params.playerScore + " : <br /><br /> You beat me congratulation :0 ! Reload the page to replay",
+                    VictoryRobot: this.params.playerScore + ' - ' + this.params.robotScore +  " <br /><br /> I win ! Maybe next time ;) Reload the page to replay",
+                    scoreEgality: this.params.playerScore + ' - ' + this.params.robotScore + " <br /><br />  Incredible.. Perfect equality ! Reload the page to replay"
                 }
             }
         }
