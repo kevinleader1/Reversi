@@ -1,5 +1,5 @@
 <template>
-    <div id="bordGame" :class="{'playerCantPlay' : !playerCanPlay}">
+    <div id="bordGame" :class="{'playerCantPlay' : !playerCanPlay, 'show': showBoardGame}">
         <box v-for="n in 64" :boxId="n"></box>
 
         <p id="score">
@@ -23,6 +23,7 @@
             let isBlack = 0, isWhite = 1;
 
             let boxItemsObject = {
+                showBoardGame: false,
                 score: {
                     playerScore: 2,
                     robotScore: 2
@@ -114,6 +115,14 @@
             }
 
             return boxItemsObject;
+        },
+
+        mounted() {
+            let vueThis = this;
+
+            setTimeout(function(){
+                vueThis.showBoardGame = true;
+            }, 100);
         },
         methods: {
 
@@ -508,7 +517,7 @@
                     this.activeBox(boxToPlay.id, 1);
                 } else {
                     this.$parent.game.playerCanPlay = true;
-                    
+
                     // The robots pass his turn cause he can't play
                     this.checkScoreAndEnd();
                 }
@@ -568,6 +577,12 @@
         margin: auto;
         border: 20px solid #5d290f;
         border-image: repeating-linear-gradient(30deg, #88421D, #85530F, #7E3300 20px) 60;
+        transform: rotateX(90deg);
+        transition: transform 1s;
+
+        &.show {
+             transform: rotateX(0deg);
+        }
     }
 
     #score {

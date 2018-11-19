@@ -71,6 +71,8 @@
     margin: 0;
     height: 25%;
     width: 25%;
+    max-width: 100px;
+    max-height: 100px;
     display: inline-block;
     transition: top 1s;
 
