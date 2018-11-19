@@ -1,6 +1,10 @@
 <template>
     <div id="bordGame" :class="{'playerCantPlay' : !playerCanPlay}">
         <box v-for="n in 64" :boxId="n"></box>
+
+        <p id="score">
+            <span class="text-small">You</span> : {{score.playerScore}} -  <span class="text-small">Robot</span> : {{score.robotScore}}
+        </p>
     </div>
 </template>
 
@@ -19,6 +23,10 @@
             let isBlack = 0, isWhite = 1;
 
             let boxItemsObject = {
+                score: {
+                    playerScore: 2,
+                    robotScore: 2
+                },
                 boxItems: {
                     // active array to avoid to foreach all time the activeBox when it not need
                     activeBox: [28, 29, 36, 37],
@@ -149,6 +157,8 @@
                     } else if (idColorPlayer == 1){
                         this.$parent.game.playerCanPlay = true;
                     }
+
+                    this.checkScoreAndEnd();
                 }
 
                 return canWePlayBox;
@@ -203,8 +213,6 @@
                          */
 
                         let canWePLayZ = this.canWePlayBoxZ(boxId, idColorPlayer, boxItems);
-
-                        console.log(canWePLayZ);
 
                         if (canWePLayZ.weCanPlay) {
                             canWePlayBox.weCanPlay = true;
@@ -389,8 +397,6 @@
 
                             canWePlayBoxZ.boxSwitch = canWePlayBoxZ.boxSwitch.concat(boxToSwitchFinal);
 
-                            console.log( canWePlayBoxZ.boxSwitch);
-
                             // This is the only scenario where we accept diag and we put weCanPlay to true
                             canWePlayBoxZ.weCanPlay = true;
                             canWePlayBoxZ.boxToStop = responseBoxToSwich.boxToStop;
@@ -406,7 +412,6 @@
                         }
                     }
 
-                    console.log( canWePlayBoxZ.boxSwitch);
                 }
 
                 // We need to find case that on the - 1 line X or + 1 line X and that in same Y linef
@@ -501,22 +506,25 @@
                 if(boxToPlay.numberSwitch > 0){
                     // Simulation finish we can realy play
                     this.activeBox(boxToPlay.id, 1);
+                } else {
+                    this.$parent.game.playerCanPlay = true;
+                    
+                    // The robots pass his turn cause he can't play
+                    this.checkScoreAndEnd();
                 }
-
-                this.checkIfIsTheEnd();
             },
 
-            checkIfIsTheEnd(){
-                // If all box are activate 64 box
-                if(this.boxItems.activeBox.length > 63){
-                    let score = this.calculScore();
+            checkScoreAndEnd(){
+                this.score = this.calculScore();
 
-                    if(score.playerScore > score.robotScore){
-                        this.$parent.showMessage('VictoryUser', score);
-                    } else if (score.playerScore < score.robotScore){
-                        this.$parent.showMessage('VictoryRobot', score);
+                // If all box are activate 64 box
+                if(this.boxItems.activeBox.length >= 64){
+                    if(this.score.playerScore > this.score.robotScore){
+                        this.$parent.showMessage('VictoryUser');
+                    } else if (this.score.playerScore < this.score.robotScore){
+                        this.$parent.showMessage('VictoryRobot');
                     } else {
-                        this.$parent.showMessage('scoreEgality', score);
+                        this.$parent.showMessage('scoreEgality');
                     }
                 }
             },
@@ -560,6 +568,17 @@
         margin: auto;
         border: 20px solid #5d290f;
         border-image: repeating-linear-gradient(30deg, #88421D, #85530F, #7E3300 20px) 60;
+    }
+
+    #score {
+        margin: 0;
+        color: white;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+        top: -19px;
+        right: 0;
+        text-align: center;
     }
 </style>
 

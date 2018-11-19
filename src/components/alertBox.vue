@@ -1,6 +1,6 @@
 <template>
     <div id="alertMessage">
-        <p v-html="messageToShow[message]"></p>
+        <p>{{messageToShow[message]}}</p>
     </div>
 </template>
 
@@ -9,15 +9,14 @@
         name: 'alertBox',
         props: [
             'message',
-            'params'
         ],
         data(){
             return {
                 messageToShow: {
                     start: "Good luck =)",
-                    VictoryUser: this.params.robotScore + ' - ' + this.params.playerScore + " : <br /><br /> You beat me congratulation :0 ! Reload the page to replay",
-                    VictoryRobot: this.params.playerScore + ' - ' + this.params.robotScore +  " <br /><br /> I win ! Maybe next time ;) Reload the page to replay",
-                    scoreEgality: this.params.playerScore + ' - ' + this.params.robotScore + " <br /><br />  Incredible.. Perfect equality ! Reload the page to replay"
+                    VictoryUser: "You beat me congratulation :0 ! Reload the page to replay",
+                    VictoryRobot: "I win ! Maybe next time ;) Reload the page to replay",
+                    scoreEgality: "Incredible.. Perfect equality ! Reload the page to replay"
                 }
             }
         }
@@ -39,7 +38,6 @@
         max-width: 430px;
         font-size: 18px;
         font-weight: bold;
-        font-family: monospace, arial;
         background-color: white;
         display: flex;
         justify-content: center;

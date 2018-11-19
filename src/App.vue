@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <boardGame :playerCanPlay="game.playerCanPlay"/>
-    <alertBox :class="{'visible' : alertBox.displayMessage}" :message="alertBox.message" :params="params" />
+    <alertBox :class="{'visible' : alertBox.displayMessage}" :message="alertBox.message" />
     <img :class="{'show': !game.playerCanPlay ,'hide' : game.playerCanPlay}" id="yourRobotOpponent" src="./assets/imgs/svg/robot.svg" />
   </div>
 </template>
@@ -20,7 +20,6 @@
       return {
         alertBox: {
           message: 'start',
-          params: {},
           displayMessage: false
         },
         game: {
@@ -44,12 +43,8 @@
       }, 500);
     },
     methods: {
-      showMessage(message, params){
+      showMessage(message){
         this.alertBox.message = message;
-
-        if(typeof(params) != 'undefined'){
-          this.alertBox.params = params;
-        }
 
         this.alertBox.displayMessage = true;
       }
@@ -86,5 +81,15 @@
     &.hide {
       top: -100%
     }
+  }
+</style>
+
+<style>
+  .text-small {
+    font-size: 14px;
+  }
+
+  p {
+    font-family: monospace, arial;
   }
 </style>
