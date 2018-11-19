@@ -360,23 +360,31 @@
                     boxToStop: 0
                 };
 
-                let boxWeHaveToCheck = [];
+                canWePlayBoxZ.boxSwitch = findDiagForOnBox(boxId, canWePlayBoxZ.boxSwitch).boxToSwitch;
 
-                canWePlayBoxZ.boxSwitch = findDiagForOnBox(boxId);
+                for(let i=0; i < canWePlayBoxZ.boxSwitch.length ; i++){
 
-                for(let i=0; i < canWePlayBoxZ.boxSwitch.length; i++){
-
-                    console.log('ok');
-
-                    let responseBoxToSwich = findDiagForOnBox(canWePlayBoxZ.boxSwitch[i])
-
-                    canWePlayBoxZ.boxSwitch = canWePlayBoxZ.boxSwitch.concat(responseBoxToSwich);
+                    let responseBoxToSwich = findDiagForOnBox(canWePlayBoxZ.boxSwitch[i], canWePlayBoxZ.boxSwitch)
 
                     // If we find diag with the same color, is the color to stop
-                    if(responseBoxToSwich.colorToSwitch == idColorPlayer){
+                    if(responseBoxToSwich.boxToStop != 0){
+
+                        // We have to see if the black end point it's a true end point diag in the same line than other boxSwitch
+                        if(boxItems[responseBoxToSwich.boxToStop].lines.x < boxItems[boxId].lines.x){
+                            if(boxItems[boxId].lines.x - boxItems[responseBoxToSwich.boxToStop].lines.x < canWePlayBoxZ.boxSwitch.length){
+                                // it's not possible, because is not the line that we purchase
+                                break;
+                            }
+                        } else {
+                            if(boxItems[responseBoxToSwich.boxToStop].lines.x - boxItems[boxId].lines.x < canWePlayBoxZ.boxSwitch.length){
+                                // it's not possible, because is not the line that we purchase
+                                break;
+                            }
+                        }
+
                         // This is the only scenario where we accept diag and we put weCanPlay to true
                         canWePlayBoxZ.weCanPlay = true;
-                        canWePlayBoxZ.boxToStop = canWePlayBoxZ.boxToSwitch[i];
+                        canWePlayBoxZ.boxToStop = responseBoxToSwich.boxToStop;
 
                         break;
                     }
@@ -385,16 +393,21 @@
                     if(responseBoxToSwich.boxToSwitch.length == 0){
                         break;
                     }
+
+                    // Sinon c'est bon on inject les reponses
+                    canWePlayBoxZ.boxSwitch = canWePlayBoxZ.boxSwitch.concat(responseBoxToSwich.boxToSwitch);
                 }
 
                 // We need to find case that on the - 1 line X or + 1 line X and that in same Y linef
 
-                function findDiagForOnBox(boxId)
+                function findDiagForOnBox(boxId, boxYetFound)
                 {
                     let boxDiag = {
                         boxToSwitch: [],
-                        colorToSwitch: ''
+                        boxToStop: 0
                     };
+
+                    let boxWeHaveToCheck = [];
 
                     if(boxItems[boxId].lines.x > 1){
                         boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x - 1])
@@ -404,30 +417,42 @@
                         boxWeHaveToCheck = boxWeHaveToCheck.concat(boxItems.lines.x[boxItems[boxId].lines.x + 1])
                     }
 
+                    // We going to take off the box that we yet know boxYetFound
+                    for(let i=0; i < boxWeHaveToCheck.length ;i++){
+                        if(boxYetFound.indexOf(boxWeHaveToCheck[i]) !== -1){
+                            boxWeHaveToCheck.splice(i, 1);
+                        }
+                    }
+
                     // We going to see in these two line, the 4 cases that can be a diagonale
-                    for(let boxCheck of boxWeHaveToCheck){
+                    for (let boxCheck of boxWeHaveToCheck) {
 
                         let itsADiag = false;
 
                         // cause there is no diag on 8 or 1 in y dimension next
-                        if(boxItems[boxId].lines.y - 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y > 1){
+                        if (boxItems[boxId].lines.y - 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y > 1) {
                             itsADiag = true;
                         }
 
                         // cause there is no diag on 8 or 1 in y dimension next
-                        if(boxItems[boxId].lines.y + 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y < 8){
+                        if (boxItems[boxId].lines.y + 1 == boxItems[boxCheck].lines.y && boxItems[boxId].lines.y < 8) {
                             itsADiag = true;
                         }
 
-                        if(itsADiag){
-                            // We have to valide that is a box only if it's an adverse button and it's active
-                            if(boxItems.activeBox.indexOf(boxCheck) !== -1 && boxItems[boxCheck].color != idColorPlayer){
-                                // this is a real diagonal that can be use for make point
-                                boxDiag.boxToSwitch.push(boxCheck);
-                                boxDiag.colorToSwitch = boxItems[boxCheck].color;
-                            } else if (boxItems[boxCheck].color == idColorPlayer){
-                                // If it's active but it's black this is the end of the parcours line
-                                boxDiag.colorToSwitch = idColorPlayer;
+                        if (itsADiag) {
+                            // If the box is empty, systeme will stop automatique
+                            if (boxItems.activeBox.indexOf(boxCheck) !== -1) {
+                                // We have to valide that is a box only if it's an adverse button and it's active
+
+                                console.log(boxItems[boxCheck].color);
+                                if (boxItems[boxCheck].color != idColorPlayer) {
+                                    // this is a real diagonal that can be use for make point
+                                    boxDiag.boxToSwitch.push(boxCheck);
+                                    boxDiag.colorToSwitch = boxItems[boxCheck].color;
+                                } else if (boxItems[boxCheck].color == idColorPlayer) {
+                                    // If it's active but it's black this is the end of the parcours line
+                                    boxDiag.boxToStop = boxCheck;
+                                }
                             }
                         }
                     }
@@ -461,9 +486,40 @@
                 if(boxToPlay.numberSwitch > 0){
                     // Simulation finish we can realy play
                     this.activeBox(boxToPlay.id, 1);
-                } else {
-                    // You Win !
-                    this.$parent.showMessage('victory');
+                }
+
+                this.checkIfIsTheEnd();
+            },
+
+            checkIfIsTheEnd(){
+                // If all box are activate 64 box
+                if(this.boxItems.activeBox.length >= 63){
+                    let score = this.calculScore();
+
+                    if(score.playerScore > score.robotScore){
+                        this.$parent.showMessage('VictoryUser');
+                    } else if (score.playerScore < score.robotScore){
+                        this.$parent.showMessage('VictoryRobot');
+                    } else {
+                        this.$parent.showMessage('scoreEgality');
+                    }
+                }
+            },
+            calculScore(){
+                let playerScore = 0,
+                    robotScore = 0;
+
+                for(let boxActive of this.boxItems.activeBox){
+                    if(this.boxItems[boxActive].color == 0){
+                        playerScore++;
+                    } else if (this.boxItems[boxActive].color == 1){
+                        robotScore++;
+                    }
+                }
+
+                return {
+                    playerScore: playerScore,
+                    robotScore: robotScore
                 }
             }
         }

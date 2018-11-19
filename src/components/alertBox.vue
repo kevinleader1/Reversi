@@ -14,7 +14,9 @@
             return {
                 messageToShow: {
                     start: "Good luck =)",
-                    victory: "You beat me congratulation :0 ! Reload the page to replay"
+                    VictoryUser: "You beat me congratulation :0 ! Reload the page to replay",
+                    VictoryRobot: "I win ! Maybe next time ;) Reload the page to replay",
+                    scoreEgality: "Incredible.. Perfect equality ! Reload the page to replay"
                 }
             }
         }

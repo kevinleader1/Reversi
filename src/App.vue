@@ -43,8 +43,8 @@
       }, 500);
     },
     methods: {
-      showMessage(){
-        this.alertBox.message = 'victory';
+      showMessage(message){
+        this.alertBox.message = message;
 
         this.alertBox.displayMessage = true;
       }
