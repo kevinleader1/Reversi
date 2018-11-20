@@ -1,6 +1,7 @@
 <template>
     <div id="alertMessage">
         <p>{{messageToShow[message]}}</p>
+        <img id="reload-button" :class="{'display': displayReloadButton}" @click="this.$parent.reloadPage" src="../assets/imgs/svg/reload.svg" />
     </div>
 </template>
 
@@ -16,7 +17,16 @@
                     start: "Good luck =)",
                     VictoryUser: "You beat me congratulation :0 ! Reload the page to replay",
                     VictoryRobot: "I win ! Maybe next time ;) Reload the page to replay",
-                    scoreEgality: "Incredible.. Perfect equality ! Reload the page to replay"
+                    scoreEgality: "Incredible.. Perfect equality ! Reload the page to replay",
+                }
+            }
+        },
+        computed: {
+            displayReloadButton: function(){
+                if(this.message == 'VictoryUser' || this.message == 'VictoryRobot' || this.message == 'scoreEgality'){
+                    return true
+                } else {
+                    return false;
                 }
             }
         }
@@ -50,6 +60,16 @@
 
         &.visible {
             top: 0;
+        }
+    }
+
+    #reload-button {
+        display: none;
+        cursor: pointer;
+        width: 50px;
+
+        &.display {
+            display: inline-block;
         }
     }
 </style>

@@ -47,6 +47,9 @@
         this.alertBox.message = message;
 
         this.alertBox.displayMessage = true;
+      },
+      reloadPage(){
+        window.location.reload();
       }
     }
   }
